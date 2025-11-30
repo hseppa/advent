@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <title>Aineeton joulukalenteri</title>
+  <style>
+
+	body {
+      background: #faf3ec;
+	  background: linear-gradient(rgba(250,243,236,0.8), rgba(250,243,236,0.8)), url('./haajuhlat-27.jpg') no-repeat center/cover fixed;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #b72c0e;
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      grid-template-rows: repeat(6, 80px);
+      gap: 16px;
+      margin: 24px 0;
+      z-index: 1;
+    }
+    .door {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: transform 0.14s, box-shadow 0.14s;
+    }
+    .front {
+      background: linear-gradient(135deg, #b72c0e 70%, #f2dbb1 100%);
+      color: #fff9e6;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px #e8d5c6;
+      user-select: none;
+      width: 100%;
+      height: 100%;
+      font-weight: bold;
+      font-size: 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .vibrate {
+      animation: vibrate 0.27s linear;
+    }
+    @keyframes vibrate {
+      0% { transform: translateX(0);}
+      20% { transform: translateX(-4px);}
+      40% { transform: translateX(4px);}
+      60% { transform: translateX(-4px);}
+      80% { transform: translateX(4px);}
+      100% { transform: translateX(0);}
+    }
+    /* Modaali */
+    .modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(85,40,26,0.2);
+      z-index: 10;
+      animation: fadeIn 0.2s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .modal-content {
+      background: #fffbe7;
+      border-radius: 16px;
+      box-shadow: 0 4px 32px #cbbba8;
+      color: #b72c0e;
+      font-size: 1.2rem;
+      font-weight: 500;
+      padding: 30px 28px;
+      min-width: 220px;
+      max-width: 90vw;
+      text-align: center;
+      position: relative;
+      transition: transform 0.2s;
+      transform: scale(1);
+    }
+    .testhint {
+      color: #b7986b;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h1>Aineeton joulukalenteri</h1>
+  <div class="testhint" id="testHint"></div>
+  <div class="calendar" id="calendar"></div>
+  <script>
+    const TESTMODE = true; // Kaikki luukut avattavissa milloin vain
+
+    const viestit = [
+      "1  Hierontaa illalla 10min", 
+	  "2  Minä hoidan tiskit ja luuttuan eteisen lattian", 
+	  "3  Yhteinen kävelylenkki", 
+	  "4  Lempijuoma valmiiksi",
+	  "5  Saunailta!", 
+	  "6  Yhdessä elokuva", 
+	  "7  Lämmin aamiainen",
+	  
+	  "8  Rentoutushetki: musiikin kuuntelua itsekseen sängyssä silmät kiinni", 
+	  "9  Korttipeli-ilta", 
+	  "10 Sauna ja rauha", 
+	  "11 Flamingo Spa klo 9", 
+	  "12 Parijumppa & saunailta", 
+      "13 Perhesirkus & leffailta <3",
+	  "14 10 min niskahieronta", 
+	  
+	  "15 Jalkakylpy", 
+	  "16 Yllätysviesti töihin",
+      "17 Yhteinen soittolista", 
+	  "18 Oma hetki rauhassa", 
+	  "19 Käyn kaupassa puolestasi", 
+	  "20 Suunnittelen treffi-illan",
+      "21 Musiikin kuuntelua", 
+	  
+	  "22 Herkkuhetki", 
+	  "23 Valmistan teetä", 
+	  "24 Halaukset extrana"
+    ];
+
+    const calendar = document.getElementById('calendar');
+    const testHint = document.getElementById('testHint');
+    if (TESTMODE) testHint.textContent = "Testitila päällä: kaikki luukut aukeavat.";
+
+    function getToday() {
+      if (TESTMODE) return 24;
+      const now = new Date();
+      if (now.getMonth() === 11) {
+        return Math.min(now.getDate(), 24);
+      }
+      return 0;
+    }
+
+    for (let i = 0; i < 24; i++) {
+      const door = document.createElement('button');
+      door.className = 'door';
+      door.title = 'Avaa luukku ' + (i + 1);
+
+      const front = document.createElement('div');
+      front.className = 'front';
+      front.textContent = i + 1;
+
+      door.appendChild(front);
+
+      door.addEventListener('click', function () {
+        if ((i + 1) > getToday()) return;
+        front.classList.add('vibrate');
+        setTimeout(() => {
+          front.classList.remove('vibrate');
+        }, 270);
+
+        setTimeout(() => {
+          showModal(viestit[i]);
+        }, 280);
+      });
+
+      calendar.appendChild(door);
+    }
+
+    // Modal-toiminnallisuus
+    function showModal(text) {
+      let modal = document.createElement('div');
+      modal.className = "modal";
+      let inner = document.createElement('div');
+      inner.className = "modal-content";
+      inner.textContent = text;
+      modal.appendChild(inner);
+
+      // Sulje klikkaamalla mitä tahansa modalissa
+      modal.addEventListener('click', () => {
+        modal.remove();
+      });
+
+      // Estä modal-tekstin kuittausta
+      inner.addEventListener('click', (e) => e.stopPropagation());
+
+      document.body.appendChild(modal);
+    }
+  </script>
+</body>
+</html>
